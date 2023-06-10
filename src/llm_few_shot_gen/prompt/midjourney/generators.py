@@ -1,8 +1,8 @@
 from langchain.base_language import BaseLanguageModel
 from langchain.prompts import HumanMessagePromptTemplate, SystemMessagePromptTemplate, ChatPromptTemplate
 
-from llm_few_shot_gen.midjourney import context as midjourney_context
-from llm_few_shot_gen.abstract_classes import AbstractTextToImagePromptGenerator
+from llm_few_shot_gen.prompt.midjourney import context as midjourney_context
+from llm_few_shot_gen.prompt.abstract_classes import AbstractTextToImagePromptGenerator
 from llm_few_shot_gen.constants import INSTRUCTOR_USER_NAME
 
 

@@ -38,6 +38,7 @@ path = "src/llm_few_shot_gen/__about__.py"
 dependencies = [
   "coverage[toml]>=6.5",
   "pytest",
+  "langchain"
 ]
 [tool.hatch.envs.default.scripts]
 test = "pytest {args:tests}"
