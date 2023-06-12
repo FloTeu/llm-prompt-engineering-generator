@@ -1,3 +1,4 @@
+import logging
 from typing import List
 
 from langchain.base_language import BaseLanguageModel
@@ -5,6 +6,8 @@ from langchain.prompts import SystemMessagePromptTemplate, HumanMessagePromptTem
 from langchain.output_parsers import PydanticOutputParser
 from langchain.chains import LLMChain
 from langchain.prompts import ChatPromptTemplate
+from langchain.schema import OutputParserException
+from langchain.output_parsers import RetryWithErrorOutputParser
 
 from llm_few_shot_gen.abstract_classes import AbstractFewShotGenerator
 from llm_few_shot_gen.constants import INSTRUCTOR_USER_NAME
@@ -71,4 +74,9 @@ class AbstractTextToImagePromptGenerator(AbstractFewShotGenerator):
         chat_prompt.partial_variables = {"format_instructions": self.output_parser.get_format_instructions()}
         _input = chat_prompt.format_prompt(*args, **kwargs)
         output = self.llm(_input.to_messages())
-        return self.output_parser.parse(output.content)
+        try:
+            return self.output_parser.parse(output.content)
+        except OutputParserException:
+            logging.warning("Could not parse llm output to pydantic class. Retry...")
+            retry_parser = RetryWithErrorOutputParser.from_llm(parser=self.output_parser, llm=self.llm)
+            return retry_parser.parse_with_prompt(output.content, _input)
