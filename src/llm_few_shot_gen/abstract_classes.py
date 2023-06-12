@@ -38,7 +38,7 @@ class AbstractFewShotGenerator(ABC):
         """Extends self.messages with human message for output creation"""
         raise NotImplementedError
 
-    def _get_llm_chain(self) -> LLMChain:
+    def _fill_messages(self):
         if not self.messages.are_few_shot_examples_set():
             raise ValueError("Prompt examples are not yet provided")
         if not self.messages.is_instruction_known():
@@ -48,6 +48,8 @@ class AbstractFewShotGenerator(ABC):
         if not self.messages.is_human_message_set():
             self._set_human_message()
 
+    def _get_llm_chain(self) -> LLMChain:
+        self._fill_messages()
         chat_prompt: ChatPromptTemplate = self.messages.get_chat_prompt_template()
         return LLMChain(llm=self.llm, prompt=chat_prompt)
 
