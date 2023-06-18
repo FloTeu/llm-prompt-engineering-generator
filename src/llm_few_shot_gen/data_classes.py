@@ -6,8 +6,8 @@ from langchain.prompts.chat import BaseMessagePromptTemplate
 @dataclass
 class FewShotGenerationMessages:
     instruction_message: Optional[SystemMessagePromptTemplate] = None
-    context: Optional[List[BaseMessagePromptTemplate]] = None
-    few_shot_examples: Optional[List[BaseMessagePromptTemplate]] = None
+    context: Optional[List[SystemMessagePromptTemplate]] = None
+    few_shot_examples: Optional[List[SystemMessagePromptTemplate]] = None
     human_message: Optional[HumanMessagePromptTemplate] = None
 
     def is_instruction_known(self):
