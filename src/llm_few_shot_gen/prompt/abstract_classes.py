@@ -58,8 +58,8 @@ class AbstractTextToImagePromptGenerator(AbstractFewShotGenerator):
         #                  """
         human_template = """
                             Complete the following tasks in the right order:
-                            1. Try to extract the applied art style of the example prompts that the instructor provided you before.
-                            2. Write five concise english prompts with the content "{text}". Your suggestions should include your found styles of step 1 and use the same patterns as the example prompts.
+                            1. Try to extract the overarching styles or artists from the example prompts given to you by the instructor.
+                            2. Write five concise english prompts with the content "{text}". Your suggestions should include your found styles or artists of step 1 and use the same patterns as the example prompts.
                             {format_instructions}
                         """
 

@@ -25,4 +25,8 @@ midjourney_company_information = "Midjourney is an artificial intelligence-power
 # https://docs.midjourney.com/legacy/docs
 midjourney_v5_general_description = "Midjourney routinely releases new model versions to improve efficiency, coherency, and quality. The latest model is the default, but other models can be used using the --version or --v parameter or by using the /settings command and selecting a model version. Different models excel at different types of images."
 midjourney_v5_additional_description = "The Midjourney V5 model is the newest and most advanced model, released on March 15th, 2023. To use this model, add the --v 5 parameter to the end of a prompt, or use the /settings command and select 5️⃣ MJ Version 5. This model has very high Coherency, excels at interpreting natural language prompts, is higher resolution, and supports advanced features like repeating patterns with --tile"
-
+midjourney_model_switch = """
+How to Switch Models
+Use the Version or Test Parameter
+Add --v 4 --v 5 --v 5.1 --v 5.1 --style raw --v 5.2 --v 5.2 --style raw --niji 5 --niji 5 --style cute --niji 5 --style expressive --niji 5 --style original or --niji 5 --style scenic to the end of your prompt.
+"""

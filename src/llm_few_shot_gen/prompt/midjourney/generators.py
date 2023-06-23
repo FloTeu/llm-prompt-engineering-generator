@@ -42,4 +42,8 @@ class MidjourneyPromptGenerator(AbstractTextToImagePromptGenerator):
         context_messages.append(SystemMessagePromptTemplate.from_template(midjourney_context.prompt_details,
                                                                        additional_kwargs={
                                                                            "name": INSTRUCTOR_USER_NAME}))
+        context_messages.append(SystemMessagePromptTemplate.from_template(midjourney_context.midjourney_model_switch,
+                                                                          additional_kwargs={
+                                                                           "name": INSTRUCTOR_USER_NAME}))
         self.messages.context = context_messages
+

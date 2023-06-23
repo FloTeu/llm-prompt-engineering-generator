@@ -1,7 +1,6 @@
 from typing import List, Optional
 from dataclasses import dataclass
 from langchain.prompts import HumanMessagePromptTemplate, SystemMessagePromptTemplate, ChatPromptTemplate
-from langchain.prompts.chat import BaseMessagePromptTemplate
 
 @dataclass
 class FewShotGenerationMessages:
