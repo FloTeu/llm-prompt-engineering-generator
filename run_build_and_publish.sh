@@ -5,12 +5,12 @@ if [[ "$response" == "yes" ]]; then
     echo "Build package..."
     hatch build
     echo "Publish package..."
-    #hatch publish
+    hatch publish
 else
     echo "Update version..."
     hatch version patch
     echo "Build package..."
     hatch build
     echo "Publish package..."
-    #hatch publish
+    hatch publish
 fi
