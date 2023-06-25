@@ -1,1 +1,3 @@
+from llm_few_shot_gen.generators.base import BaseFewShotGenerator, BaseParsableFewShotGenerator
 from llm_few_shot_gen.generators.midjourney import MidjourneyPromptGenerator
+from llm_few_shot_gen.generators.prompt import ParsableTextToImagePromptGenerator
