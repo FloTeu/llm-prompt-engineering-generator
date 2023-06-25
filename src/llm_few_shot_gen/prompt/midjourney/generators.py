@@ -1,19 +1,17 @@
-from langchain.base_language import BaseLanguageModel
-from langchain.prompts import HumanMessagePromptTemplate, SystemMessagePromptTemplate, ChatPromptTemplate
+from langchain.prompts import SystemMessagePromptTemplate
 
 from llm_few_shot_gen.prompt.midjourney import context as midjourney_context
-from llm_few_shot_gen.prompt.abstract_classes import AbstractTextToImagePromptGenerator
+from llm_few_shot_gen.prompt.abstract_classes import AbstractParsableTextToImagePromptGenerator
 from llm_few_shot_gen.constants import INSTRUCTOR_USER_NAME
 
 
-class MidjourneyPromptGenerator(AbstractTextToImagePromptGenerator):
-    def __init__(self, llm: BaseLanguageModel):
-        super().__init__(llm)
+class MidjourneyPromptGenerator(AbstractParsableTextToImagePromptGenerator):
 
-    def set_context(self):
+    def _set_context(self):
+        """Extends self.messages with context and type List[SystemMessagePromptTemplate]"""
         context_messages = []
         context_messages.append(SystemMessagePromptTemplate.from_template(
-            "Here is some general information about the Midjourney company. ",
+            "Here are some general information about the Midjourney company. ",
             additional_kwargs={"name": INSTRUCTOR_USER_NAME}))
         context_messages.append(
             SystemMessagePromptTemplate.from_template(midjourney_context.midjourney_company_information,
