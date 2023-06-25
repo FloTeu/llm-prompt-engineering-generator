@@ -1,0 +1,1 @@
+from llm_few_shot_gen.generators.midjourney import MidjourneyPromptGenerator

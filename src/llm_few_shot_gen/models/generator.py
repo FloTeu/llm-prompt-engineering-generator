@@ -1,6 +1,8 @@
-from typing import List, Optional
 from dataclasses import dataclass
-from langchain.prompts import HumanMessagePromptTemplate, SystemMessagePromptTemplate, ChatPromptTemplate
+from typing import Optional, List
+
+from langchain.prompts import SystemMessagePromptTemplate, HumanMessagePromptTemplate, ChatPromptTemplate
+
 
 @dataclass
 class FewShotGenerationMessages:

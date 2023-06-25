@@ -1,15 +1,21 @@
 from typing import List
 
+from pydantic import BaseModel
 from langchain.prompts import SystemMessagePromptTemplate, HumanMessagePromptTemplate
+from langchain.base_language import BaseLanguageModel
 
-from llm_few_shot_gen.abstract_classes import AbstractParsableFewShotGenerator
 from llm_few_shot_gen.constants import INSTRUCTOR_USER_NAME
-from llm_few_shot_gen.prompt.data_classes import ImagePromptOutputModel
+from llm_few_shot_gen.generators.base import BaseParsableFewShotGenerator
+from llm_few_shot_gen.models.output import ImagePromptOutputModel
 
-class AbstractParsableTextToImagePromptGenerator(AbstractParsableFewShotGenerator):
+
+class ParsableTextToImagePromptGenerator(BaseParsableFewShotGenerator):
     """
     Abstract prompt generator class. Subclasses have the ability to generate text-to-image prompts.
     """
+
+    def __init__(self, llm: BaseLanguageModel, pydantic_cls: BaseModel=ImagePromptOutputModel):
+        super().__init__(llm=llm, pydantic_cls=pydantic_cls)
 
     def _set_system_instruction(self):
         """System message to instruct the llm model how it should act"""

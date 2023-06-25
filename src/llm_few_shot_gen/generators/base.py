@@ -1,19 +1,18 @@
 import logging
-from abc import abstractmethod, ABC
-from typing import List, Optional
+from abc import ABC, abstractmethod
+from typing import List
 
-from pydantic import BaseModel
+from langchain import LLMChain
 from langchain.base_language import BaseLanguageModel
-from langchain.prompts import HumanMessagePromptTemplate, SystemMessagePromptTemplate, ChatPromptTemplate
-from langchain.chains import LLMChain
-from langchain.output_parsers import PydanticOutputParser
+from langchain.output_parsers import PydanticOutputParser, RetryWithErrorOutputParser
+from langchain.prompts import ChatPromptTemplate
 from langchain.schema import OutputParserException
-from langchain.output_parsers import RetryWithErrorOutputParser
+from pydantic import BaseModel
 
-from llm_few_shot_gen.data_classes import FewShotGenerationMessages
+from llm_few_shot_gen.models.generator import FewShotGenerationMessages
 
 
-class AbstractFewShotGenerator(ABC):
+class BaseFewShotGenerator(ABC):
     """
     Abstract few shot generator class. Subclasses have the ability to generate text from small amount of examples.
     """
@@ -64,7 +63,7 @@ class AbstractFewShotGenerator(ABC):
         return llm_chain.run(*args, **kwargs)
 
 
-class AbstractParsableFewShotGenerator(AbstractFewShotGenerator):
+class BaseParsableFewShotGenerator(BaseFewShotGenerator):
     """
     Abstract few shot generator class.
     Subclasses have the ability to generate pydantic object from small amount of examples.

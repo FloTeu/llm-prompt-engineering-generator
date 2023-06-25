@@ -20,11 +20,13 @@ Mood: Sedate, calm, raucous, energetic, etc.
 Composition: Portrait, headshot, closeup, birds-eye view, etc.
 """
 
+
 # https://www.crunchbase.com/organization/midjourney
 midjourney_company_information = "Midjourney is an artificial intelligence-powered artwork generator. It explores new thought mediums and expands the human species' imaginative powers. It is a small self-funded team focused on design, human infrastructure, and artificial intelligence."
 # https://docs.midjourney.com/legacy/docs
 midjourney_v5_general_description = "Midjourney routinely releases new model versions to improve efficiency, coherency, and quality. The latest model is the default, but other models can be used using the --version or --v parameter or by using the /settings command and selecting a model version. Different models excel at different types of images."
 midjourney_v5_additional_description = "The Midjourney V5 model is the newest and most advanced model, released on March 15th, 2023. To use this model, add the --v 5 parameter to the end of a prompt, or use the /settings command and select 5️⃣ MJ Version 5. This model has very high Coherency, excels at interpreting natural language prompts, is higher resolution, and supports advanced features like repeating patterns with --tile"
+# https://docs.midjourney.com/docs/model-versions
 midjourney_model_switch = """
 How to Switch Models
 Use the Version or Test Parameter
