@@ -24,7 +24,11 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
-dependencies = []
+
+dependencies = [
+  "langchain==0.0.*",
+  "pydantic==1.*"
+]
 
 [project.urls]
 Documentation = "https://github.com/unknown/llm-few-shot-gen#readme"
@@ -37,9 +41,7 @@ path = "src/llm_few_shot_gen/__about__.py"
 [tool.hatch.envs.default]
 dependencies = [
   "coverage[toml]>=6.5",
-  "pytest",
-  "langchain",
-  "pydantic"
+  "pytest"
 ]
 [tool.hatch.envs.default.scripts]
 test = "pytest {args:tests}"
