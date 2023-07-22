@@ -51,5 +51,5 @@ class ParsableTextToImagePromptGenerator(BaseParsableFewShotGenerator):
             human_template
         )
 
-    def generate(self, text) -> ImagePromptOutputModel:
+    def generate(self, text: str) -> BaseModel:
         return super().generate(text=text)
