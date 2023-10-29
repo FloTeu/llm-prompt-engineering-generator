@@ -1,6 +1,6 @@
 import logging
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, Optional
 
 from langchain import LLMChain
 from langchain.base_language import BaseLanguageModel
@@ -10,6 +10,37 @@ from langchain.schema import OutputParserException
 from pydantic import BaseModel
 
 from llm_few_shot_gen.models.generator import FewShotGenerationMessages
+from llm_few_shot_gen.models.prompt_engineering import PromptEngineeringMessages, PromptEngineeringElements
+
+class FewShotGenerator:
+    """
+    Abstract few shot generator class. Combines Prompt Engineering dataclass with LLM.
+    """
+
+    def __init__(self, llm: BaseLanguageModel, prompt_elements: Optional[PromptEngineeringElements] = None):
+        self.llm = llm
+        self.prompt_elements = prompt_elements or PromptEngineeringElements()
+
+    @classmethod
+    def from_json(cls, file_path: str, llm: BaseLanguageModel):
+        prompt_elements = PromptEngineeringElements.parse_file(file_path)
+        return cls(llm=llm, prompt_elements=prompt_elements)
+
+    def _get_messages(self) -> PromptEngineeringMessages:
+        """Transform the prompt elements to langchain message dataclass"""
+        return PromptEngineeringMessages.from_pydantic(self.prompt_elements)
+
+    def _get_llm_chain(self) -> LLMChain:
+        """Combines chat messages with LLM and returns a LLM Chain"""
+        chat_prompt: ChatPromptTemplate = self._get_messages().get_chat_prompt_template()
+        return LLMChain(llm=self.llm, prompt=chat_prompt)
+
+    def generate(self, *args, **kwargs) -> str:
+        """Generates a llm str output based on few shot learning"""
+        assert self.prompt_elements.is_any_set()
+        llm_chain = self._get_llm_chain()
+        return llm_chain.run(*args, **kwargs)
+
 
 
 class BaseFewShotGenerator(ABC):
