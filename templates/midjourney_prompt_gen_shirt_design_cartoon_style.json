@@ -6,19 +6,15 @@
     "intro": "Here are some example prompts. Try to understand the underlying format of prompts in order to create new creative prompts yourself later. ",
     "human_ai_interaction": [
       {
-        "human": "Frog",
         "ai": "A cartoonish frog, bright colors. T-shirt design graphic, vector, contour, white background, without any text"
       },
       {
-        "human": "Skull",
         "ai": "realistic patriotic native American skull , cartoon character, vector art, process art, t shirt design, 8K, best quality, trending, perfect line work, perfect stroke, vector illustration, flat design, digital drawing, t shirt design --niji 5 --v 5"
       },
       {
-        "human": "Cartoon motorcycle",
         "ai": "A cartoonish motocyclist, bright colors. T - shirt design graphic, vector, contour, white background"
       },
       {
-        "human": "Cartoon unicorn",
         "ai": "realistic space unicorn cartoon character, vector art, process art, t shirt design, 8K, best quality, trending, perfect line work, perfect stroke, vector illustration, flat design, digital drawing, t shirt design --niji 5 --v 5"
       }
     ]

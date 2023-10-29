@@ -5,14 +5,14 @@ from langchain.prompts import SystemMessagePromptTemplate, HumanMessagePromptTem
 from pydantic import BaseModel, Field
 
 
-class PEFewShotHumanAIExample(BaseModel):
-    human: str = Field(description="Example human message.", examples=["What is 2 + 3?"])
-    ai: str = Field(description="Example ai message as answer to the human message.", examples=["5"])
+class PEFewShotExample(BaseModel):
+    human: Optional[str] = Field(description="Example human message.", examples=["What is 2 + 3?"])
+    ai: str = Field(description="Example ai message as answer to the human message. Or standalone example without human message.", examples=["5"])
 
 
 class PEFewShotExamples(BaseModel):
     intro: Optional[str] = Field(description="If set, the few shot examples are introduced")
-    human_ai_interaction: List[PEFewShotHumanAIExample] = Field(
+    human_ai_interaction: List[PEFewShotExample] = Field(
         description="List of example human ai interaction. Shows the LLM how the output should look like.")
 
 
@@ -44,14 +44,25 @@ class PromptElements(BaseModel):
         """Returns langchain few shot example prompt template"""
         assert self.examples, "examples are not set yet"
         examples = []
+        is_only_ai_interaction = all([not example.human for example in self.examples.human_ai_interaction])
         for example in self.examples.human_ai_interaction:
-            examples.append({"input": example.human, "output": example.ai})
-        example_prompt = ChatPromptTemplate.from_messages(
-            [
-                ("human", "{input}"),
-                ("ai", "{output}"),
-            ]
-        )
+            if is_only_ai_interaction:
+                examples.append({"output": example.ai})
+            else:
+                examples.append({"input": example.human, "output": example.ai})
+        if is_only_ai_interaction:
+            example_prompt = ChatPromptTemplate.from_messages(
+                [
+                    ("ai", "{output}")
+                ]
+            )
+        else:
+            example_prompt = ChatPromptTemplate.from_messages(
+                [
+                    ("human", "{input}"),
+                    ("ai", "{output}"),
+                ]
+            )
         return FewShotChatMessagePromptTemplate(
             example_prompt=example_prompt,
             examples=examples,
@@ -121,6 +132,8 @@ class PEMessages(BaseModel):
             messages.append(self.context)
         if self.output_format:
             messages.append(self.output_format)
+        if self.examples_intro:
+            messages.append(self.examples_intro)
         if self.examples:
             messages.append(self.examples)
         if self.input:

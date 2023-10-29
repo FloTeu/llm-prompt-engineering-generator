@@ -43,6 +43,6 @@ Complete the following tasks in the right order:
     """
     llm_parsed_output: ImagePromptOutputModel = prompt_generator.generate(text="dog")
     assert type(llm_parsed_output) == ImagePromptOutputModel
-    assert "cartoon" in llm_parsed_output.few_shot_styles
+    assert "cartoon" in llm_parsed_output.few_shot_styles or "cartoonish" in llm_parsed_output.few_shot_styles
 
 
