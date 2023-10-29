@@ -16,31 +16,36 @@ pip install llm-few-shot-gen
 Large language models (LLMs) are emerging as a transformative technology, enabling developers to build applications that they previously could not. However, fine-tune them is not always possible or too expansive. In-context learning like Few Shot learning tries to solve this problem. Based on a few number of examples within the prompt a specific output can be obtained. This llm-few-shot-gen library enables few shot learning in a convenient way. 
 
 ## How can I use it?
-The core functionality is the `generators` module. The abstract class `BaseFewShotGenerator` defines all requirements for a LLM few shot generator. You can either use a base class and create a child for your own use case or pick one of the existing generator classes. 
+The core functionality is the `generators` module. The class `PromptEngineeringGenerator` defines all requirements for a LLM to generate text based on prompt engineering techniques. If you want your output to be parsed into an pydantic dataclass checkout the class `ParsablePromptEngineeringGenerator`. 
 
-### Required functions of `BaseFewShotGenerator` children
+## How to customise the class for my own use case?
+The class `PromptEngineeringGenerator` contains two core parts 1. LLM 2. prompt engineering dataclass. If you want to initialise the generator class for you custom use case, you need to define a prompt engineering JSON file matching the format of `llm_few_shot_gen.models.prompt_engineering.PromptElements`.
+
+The JSON file can contain the following prompt elements in any combination tailored to your use case:
+
+**Role**:
+The role in which the LLM should respond
 
 **Instruction**:
-Instruction for LLM model
+The task of the LLM
 
 **Context**:
-Context of the Few Shot learning use case
+Context with relevant information to solve the task
+
+**Output Format**:
+Description how the LLM output format should look like
 
 **Few Shot Examples**:
-Example text to obtain a certain output
+Few shot examples with optional introduction
 
-**IO Prompt**:
-Output instruction, which might contain some human input as well. I/O=input/output
-
-
-### Ready to use Generators
-* [Midjourney Prompt Generator](https://github.com/FloTeu/llm-few-shot-generator/blob/main/src/llm_few_shot_gen/generators/midjourney.py)
-
+**Input**:
+Target which the LLM should execute the task on. Could be for example a user question, or a text block to summarize.
 
 
 ### Showcases
-* [Notebook Showcase](https://github.com/FloTeu/llm-few-shot-generator/blob/main/notebooks/few_shot_shirt_designs.ipynb)
-* [Midjourney Prompt Generator](https://midjourney-prompt-generator.streamlit.app/)
+* [Notebook Showcase: Midjourney Prompt](https://github.com/FloTeu/llm-few-shot-generator/blob/main/notebooks/few_shot_shirt_designs.ipynb)
+* [Notebook Showcase: Keyword Extractor](https://github.com/FloTeu/llm-few-shot-generator/blob/main/notebooks/few_shot_keyword_extractor.ipynb)
+* [App: Image Gen AI Prompt Generator](https://image-gen-ai-app.streamlit.app/)
 
 
 ## License

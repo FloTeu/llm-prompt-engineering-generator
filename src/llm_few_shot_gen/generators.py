@@ -1,6 +1,5 @@
 import logging
-from abc import ABC, abstractmethod
-from typing import List, Optional, Type
+from typing import Optional, Type
 
 from langchain import LLMChain
 from langchain.base_language import BaseLanguageModel
@@ -11,9 +10,10 @@ from pydantic import BaseModel
 
 from llm_few_shot_gen.models.prompt_engineering import PEMessages, PromptElements
 
-class FewShotGenerator:
+
+class PromptEngineeringGenerator:
     """
-    Few shot generator class. Combines Prompt Engineering dataclass with LLM.
+    Combines Prompt Engineering dataclass with LLM.
     """
 
     def __init__(self, llm: BaseLanguageModel, prompt_elements: Optional[PromptElements] = None):
@@ -41,19 +41,19 @@ class FewShotGenerator:
         return llm_chain.run(*args, **kwargs)
 
 
-class ParsableFewShotGenerator(FewShotGenerator):
+class ParsablePromptEngineeringGenerator(PromptEngineeringGenerator):
     """
-    Enhances FewShotGenerator with pydantic output format.
+    Enhances PromptEngineeringGenerator with pydantic output format.
     LLM output will be parsed to pydantic.
     Prompt element output format is ignored, if pydantic is provided.
     """
 
-    def __init__(self, llm: BaseLanguageModel, pydantic_cls: Type[BaseModel], prompt_elements: Optional[PromptElements] = None):
+    def __init__(self, llm: BaseLanguageModel, pydantic_cls: Type[BaseModel],
+                 prompt_elements: Optional[PromptElements] = None):
         super().__init__(llm=llm, prompt_elements=prompt_elements)
         # Set up a parser
         self.output_parser = PydanticOutputParser(pydantic_object=pydantic_cls)
         self.prompt_elements.output_format = self.output_parser.get_format_instructions()
-
 
     @classmethod
     def from_json(cls, file_path: str, llm: BaseLanguageModel, pydantic_cls: Type[BaseModel]):
@@ -72,4 +72,3 @@ class ParsableFewShotGenerator(FewShotGenerator):
             retry_parser = RetryWithErrorOutputParser.from_llm(parser=self.output_parser, llm=self.llm)
             _input = self._get_llm_chain().prompt.format_prompt(*args, **kwargs)
             return retry_parser.parse_with_prompt(llm_output, _input)
-
