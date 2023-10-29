@@ -1,16 +1,19 @@
 from typing import Optional, List
 
 from langchain.prompts import SystemMessagePromptTemplate, HumanMessagePromptTemplate, ChatPromptTemplate, \
-    FewShotChatMessagePromptTemplate, ChatMessagePromptTemplate, PromptTemplate
+    FewShotChatMessagePromptTemplate, PromptTemplate
 from pydantic import BaseModel, Field
+
 
 class PEFewShotHumanAIExample(BaseModel):
     human: str = Field(description="Example human message.", examples=["What is 2 + 3?"])
     ai: str = Field(description="Example ai message as answer to the human message.", examples=["5"])
 
+
 class PEFewShotExamples(BaseModel):
     intro: Optional[str] = Field(description="If set, the few shot examples are introduced")
-    human_ai_interaction: List[PEFewShotHumanAIExample] = Field(description="List of example human ai interaction. Shows the LLM how the output should look like.")
+    human_ai_interaction: List[PEFewShotHumanAIExample] = Field(
+        description="List of example human ai interaction. Shows the LLM how the output should look like.")
 
 
 class PromptElements(BaseModel):
@@ -33,10 +36,12 @@ class PromptElements(BaseModel):
         """
         return any([self.role, self.instruction, self.context, self.examples, self.input, self.output_format])
 
+    def get_few_shot_intro_prompt_template(self) -> Optional[SystemMessagePromptTemplate]:
+        if self.examples and self.examples.intro:
+            return SystemMessagePromptTemplate.from_template(self.examples.intro)
 
     def get_few_shot_chat_msg_prompt_template(self) -> FewShotChatMessagePromptTemplate:
         """Returns langchain few shot example prompt template"""
-        # TODO: How to integrate optional intro here?
         assert self.examples, "examples are not set yet"
         examples = []
         for example in self.examples.human_ai_interaction:
@@ -52,6 +57,7 @@ class PromptElements(BaseModel):
             examples=examples,
         )
 
+
 class PEMessages(BaseModel):
     """
     Dataclass which contains everything to create a LLM Output
@@ -64,12 +70,12 @@ class PEMessages(BaseModel):
         description="Context with relevant information to solve the task")
     output_format: Optional[SystemMessagePromptTemplate] = Field(
         description="Description how the LLM output format should look like")
+    examples_intro: Optional[SystemMessagePromptTemplate] = Field(
+        description="Optional intro block to explain LLM how to handle following examples")
     examples: Optional[FewShotChatMessagePromptTemplate] = Field(
         description="List of (few-shot) examples, how the output should look like")
     input: Optional[HumanMessagePromptTemplate] = Field(
         description="Target which the LLM should execute the task on. Could be for example a user question, or a text block to summarize.")
-
-
 
     @classmethod
     def from_pydantic(cls, pe_elements: PromptElements):
@@ -79,15 +85,17 @@ class PEMessages(BaseModel):
             output_format_prompt = PromptTemplate(
                 template="{format_instructions}",
                 input_variables=[],
-                partial_variables = {"format_instructions": pe_elements.output_format}
+                partial_variables={"format_instructions": pe_elements.output_format}
             )
             output_format_msg = SystemMessagePromptTemplate(prompt=output_format_prompt)
-
+        examples_intro_msg = pe_elements.get_few_shot_intro_prompt_template()
 
         return cls(
             role=SystemMessagePromptTemplate.from_template(pe_elements.role) if pe_elements.role else None,
-            instruction=SystemMessagePromptTemplate.from_template(pe_elements.instruction) if pe_elements.instruction else None,
+            instruction=SystemMessagePromptTemplate.from_template(
+                pe_elements.instruction) if pe_elements.instruction else None,
             context=SystemMessagePromptTemplate.from_template(pe_elements.context) if pe_elements.context else None,
+            examples_intro=examples_intro_msg,
             examples=pe_elements.get_few_shot_chat_msg_prompt_template() if pe_elements.examples else None,
             input=HumanMessagePromptTemplate.from_template(pe_elements.input) if pe_elements.input else None,
             output_format=output_format_msg
@@ -99,7 +107,7 @@ class PEMessages(BaseModel):
 
     @classmethod
     def from_yaml(cls, file_path):
-        #TODO
+        # TODO
         raise NotImplementedError
 
     def get_chat_prompt_template(self) -> ChatPromptTemplate:

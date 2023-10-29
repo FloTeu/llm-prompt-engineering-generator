@@ -1,0 +1,6 @@
+{
+  "role": "You are a keyword extractor.",
+  "instruction": "Transform the input text delimited by ''' into a list of keywords.",
+  "input": "'''{text}'''",
+  "output_format": "The output should be in the format of an comma separated list. For example 'keyword1,keyword2,keyowrd3'"
+}

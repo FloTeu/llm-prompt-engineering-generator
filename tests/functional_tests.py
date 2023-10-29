@@ -20,6 +20,18 @@ def test_sentiment_generator():
     sentiment = prompt_generator.generate(text="My dog looks so cute today")
     assert sentiment == "positive"
 
+def test_keyword_extractor_generator():
+    """Test if output format is correct with keyword extractor template"""
+    llm = ChatOpenAI(temperature=0.0)
+    prompt_generator = FewShotGenerator.from_json(f"templates/keyword_extractor.json", llm=llm)
+    # Wiki article about gen AI
+    llm_output = prompt_generator.generate(text="""
+Generative artificial intelligence (also generative AI or GenAI[1]) is artificial intelligence capable of generating text, images, or other media, using generative models.[2][3][4] Generative AI models learn the patterns and structure of their input training data and then generate new data that has similar characteristics.
+In the early 2020s, advances in transformer-based deep neural networks enabled a number of generative AI systems notable for accepting natural language prompts as input. These include large language model chatbots such as ChatGPT, Bing Chat, Bard, and LLaMA, and text-to-image artificial intelligence art systems such as Stable Diffusion, Midjourney, and DALL-E.
+    """)
+    # test if we can transform the output into an list
+    assert len(llm_output.split(",")) > 10, "LLM could not extract more than 5 keywords in comma separated format"
+
 def test_parsed_midjourney_prompt_generator():
     """Test if basic prompt generator class can be initialised an executed"""
     llm = ChatOpenAI(temperature=0.0)
@@ -32,4 +44,5 @@ Complete the following tasks in the right order:
     llm_parsed_output: ImagePromptOutputModel = prompt_generator.generate(text="dog")
     assert type(llm_parsed_output) == ImagePromptOutputModel
     assert "cartoon" in llm_parsed_output.few_shot_styles
+
 
