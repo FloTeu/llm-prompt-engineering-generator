@@ -38,7 +38,7 @@ keyword_extractor = PromptEngineeringGenerator.from_json("templates/keyword_extr
 llm_output = keyword_extractor.generate(text=text_with_keywords)
 
 ## Option 2: Simply create a Prompt Engineering class yourself
-prompt_elements = PromptElements(role="You are a keyword extractor", instruction="Extract the keyword from the text felimited by '''", input="'''{text}'''")
+prompt_elements = PromptElements(role="You are a keyword extractor", instruction="Extract the keyword from the text delimited by '''", input="'''{text}'''")
 llm = ChatOpenAI(temperature=0.0)
 keyword_extractor = PromptEngineeringGenerator(llm=llm, prompt_elements=prompt_elements)
 llm_output = keyword_extractor.generate(text=text_with_keywords)
@@ -69,8 +69,8 @@ Target which the LLM should execute the task on. Could be for example a user que
 
 
 ### Showcases
-* [Notebook Showcase: Midjourney Prompt](https://github.com/FloTeu/llm-prompt-engineering-generator/blob/main/notebooks/few_shot_shirt_designs.ipynb)
-* [Notebook Showcase: Keyword Extractor](https://github.com/FloTeu/llm-prompt-engineering-generator/blob/main/notebooks/few_shot_keyword_extractor.ipynb)
+* [Notebook Showcase: Midjourney Prompt](https://github.com/FloTeu/llm-prompt-engineering-generator/blob/main/notebooks/few_shot_shirt_design_image_prompts.ipynb)
+* [Notebook Showcase: Keyword Extractor](https://github.com/FloTeu/llm-prompt-engineering-generator/blob/main/notebooks/keyword_extractor.ipynb)
 * [App: Image Gen AI Prompt Generator](https://image-gen-ai-app.streamlit.app/)
 
 

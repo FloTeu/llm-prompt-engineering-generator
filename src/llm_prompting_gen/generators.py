@@ -1,7 +1,7 @@
 import logging
 from typing import Optional, Type
 
-from langchain import LLMChain
+from langchain.chains import LLMChain
 from langchain.base_language import BaseLanguageModel
 from langchain.output_parsers import PydanticOutputParser, RetryWithErrorOutputParser
 from langchain.prompts import ChatPromptTemplate
