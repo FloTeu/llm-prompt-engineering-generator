@@ -35,7 +35,7 @@ class PromptEngineeringGenerator:
         return LLMChain(llm=self.llm, prompt=chat_prompt)
 
     def generate(self, *args, **kwargs) -> str:
-        """Generates a llm str output based on few shot learning"""
+        """Generates a llm str output based on prompt engineering elements"""
         assert self.prompt_elements.is_any_set()
         llm_chain = self._get_llm_chain()
         return llm_chain.run(*args, **kwargs)
