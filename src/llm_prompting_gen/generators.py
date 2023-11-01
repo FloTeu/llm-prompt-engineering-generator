@@ -8,7 +8,7 @@ from langchain.prompts import ChatPromptTemplate
 from langchain.schema import OutputParserException
 from pydantic import BaseModel
 
-from llm_few_shot_gen.models.prompt_engineering import PEMessages, PromptElements
+from llm_prompting_gen.models.prompt_engineering import PEMessages, PromptElements
 
 
 class PromptEngineeringGenerator:

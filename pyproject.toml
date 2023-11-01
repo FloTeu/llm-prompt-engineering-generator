@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "llm-few-shot-gen"
+name = "llm-prompting-gen"
 dynamic = ["version"]
 description = ''
 readme = "README.md"
@@ -31,12 +31,12 @@ dependencies = [
 ]
 
 [project.urls]
-Documentation = "https://github.com/unknown/llm-few-shot-gen#readme"
-Issues = "https://github.com/unknown/llm-few-shot-gen/issues"
-Source = "https://github.com/unknown/llm-few-shot-gen"
+Documentation = "https://github.com/FloTeu/llm-prompt-engineering-generator#readme"
+Issues = "https://github.com/FloTeu/llm-prompt-engineering-generator/issues"
+Source = "https://github.com/FloTeu/llm-prompt-engineering-generator"
 
 [tool.hatch.version]
-path = "src/llm_few_shot_gen/__about__.py"
+path = "src/llm_prompting_gen/__about__.py"
 
 [tool.hatch.envs.default]
 dependencies = [
@@ -66,7 +66,7 @@ dependencies = [
   "ruff>=0.0.243",
 ]
 [tool.hatch.envs.lint.scripts]
-typing = "mypy --install-types --non-interactive {args:src/llm_few_shot_gen tests}"
+typing = "mypy --install-types --non-interactive {args:src/llm_prompting_gen tests}"
 style = [
   "ruff {args:.}",
   "black --check --diff {args:.}",
@@ -132,7 +132,7 @@ unfixable = [
 ]
 
 [tool.ruff.isort]
-known-first-party = ["llm_few_shot_gen"]
+known-first-party = ["llm_prompting_gen"]
 
 [tool.ruff.flake8-tidy-imports]
 ban-relative-imports = "all"
@@ -142,16 +142,16 @@ ban-relative-imports = "all"
 "tests/**/*" = ["PLR2004", "S101", "TID252"]
 
 [tool.coverage.run]
-source_pkgs = ["llm_few_shot_gen", "tests"]
+source_pkgs = ["llm_prompting_gen", "tests"]
 branch = true
 parallel = true
 omit = [
-  "src/llm_few_shot_gen/__about__.py",
+  "src/llm_prompting_gen/__about__.py",
 ]
 
 [tool.coverage.paths]
-llm_few_shot_gen = ["src/llm_few_shot_gen", "*/llm-few-shot-gen/src/llm_few_shot_gen"]
-tests = ["tests", "*/llm-few-shot-gen/tests"]
+llm_prompting_gen = ["src/llm_prompting_gen", "*/llm-prompting-gen/src/llm_prompting_gen"]
+tests = ["tests", "*/llm-prompting-gen/tests"]
 
 [tool.coverage.report]
 exclude_lines = [

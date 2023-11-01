@@ -1,7 +1,7 @@
 from langchain.chat_models import ChatOpenAI
-from llm_few_shot_gen.generators import PromptEngineeringGenerator, ParsablePromptEngineeringGenerator
-from llm_few_shot_gen.models.output import ImagePromptOutputModel
-from llm_few_shot_gen.models.prompt_engineering import PEMessages
+from llm_prompting_gen.generators import PromptEngineeringGenerator, ParsablePromptEngineeringGenerator
+from llm_prompting_gen.models.output import ImagePromptOutputModel
+from llm_prompting_gen.models.prompt_engineering import PEMessages
 
 
 def test_data_class_initialising():
