@@ -6,6 +6,9 @@
 -----
 
 
+> [!WARNING]  
+> This library is not maintained anymore. Checkout the new project llm-prompting-gen.
+
 ## Installation
 
 ```console
