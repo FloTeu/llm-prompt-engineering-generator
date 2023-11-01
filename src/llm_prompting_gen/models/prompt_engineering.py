@@ -3,7 +3,7 @@ from typing import Optional, List
 from langchain.prompts import SystemMessagePromptTemplate, HumanMessagePromptTemplate, ChatPromptTemplate, \
     FewShotChatMessagePromptTemplate, PromptTemplate
 from pydantic import BaseModel, Field
-
+from llm_prompting_gen.constants import INSTRUCTOR_USER_NAME
 
 class PEFewShotExample(BaseModel):
     human: Optional[str] = Field(description="Example human message.", examples=["What is 2 + 3?"])
@@ -38,7 +38,7 @@ class PromptElements(BaseModel):
 
     def get_few_shot_intro_prompt_template(self) -> Optional[SystemMessagePromptTemplate]:
         if self.examples and self.examples.intro:
-            return SystemMessagePromptTemplate.from_template(self.examples.intro)
+            return SystemMessagePromptTemplate.from_template(self.examples.intro, additional_kwargs={"name": INSTRUCTOR_USER_NAME})
 
     def get_few_shot_chat_msg_prompt_template(self) -> FewShotChatMessagePromptTemplate:
         """Returns langchain few shot example prompt template"""
@@ -65,7 +65,7 @@ class PromptElements(BaseModel):
             )
         return FewShotChatMessagePromptTemplate(
             example_prompt=example_prompt,
-            examples=examples,
+            examples=examples
         )
 
 
@@ -102,10 +102,10 @@ class PEMessages(BaseModel):
         examples_intro_msg = pe_elements.get_few_shot_intro_prompt_template()
 
         return cls(
-            role=SystemMessagePromptTemplate.from_template(pe_elements.role) if pe_elements.role else None,
+            role=SystemMessagePromptTemplate.from_template(pe_elements.role, additional_kwargs={"name": INSTRUCTOR_USER_NAME}) if pe_elements.role else None,
             instruction=SystemMessagePromptTemplate.from_template(
-                pe_elements.instruction) if pe_elements.instruction else None,
-            context=SystemMessagePromptTemplate.from_template(pe_elements.context) if pe_elements.context else None,
+                pe_elements.instruction, additional_kwargs={"name": INSTRUCTOR_USER_NAME}) if pe_elements.instruction else None,
+            context=SystemMessagePromptTemplate.from_template(pe_elements.context, additional_kwargs={"name": INSTRUCTOR_USER_NAME}) if pe_elements.context else None,
             examples_intro=examples_intro_msg,
             examples=pe_elements.get_few_shot_chat_msg_prompt_template() if pe_elements.examples else None,
             input=HumanMessagePromptTemplate.from_template(pe_elements.input) if pe_elements.input else None,
