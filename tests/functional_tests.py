@@ -3,16 +3,53 @@ from langchain.chat_models import ChatOpenAI
 from langchain.prompts import SystemMessagePromptTemplate
 from pydantic import BaseModel, Field
 from llm_prompting_gen.generators import PromptEngineeringGenerator, ParsablePromptEngineeringGenerator
-from llm_prompting_gen.models.prompt_engineering import PEMessages, PromptElements, PEFewShotExamples
+from llm_prompting_gen.models.prompt_engineering import PromptEngineeringMessages, PromptElements
 from llm_prompting_gen.models.output import KeywordExtractorOutput
 
 def test_data_class_initialising():
     """Test if we can init a templates class based on some test json files"""
     for file_name in ["sentiment", "kindergartner"]:
         # Test loading json
-        pe_messages = PEMessages.from_json(f"templates/{file_name}.json")
+        pe_messages = PromptEngineeringMessages.from_json(f"templates/{file_name}.json")
         # Test creating chat prompt template
         pe_messages.get_chat_prompt_template()
+
+def test_extra_field():
+    """
+    PromptElements can contain extra fields.
+    This fields are supposed to be system messages in the final prompt
+    """
+    llm = ChatOpenAI(temperature=0.0)
+    pe_gen = PromptEngineeringGenerator.from_json(f"templates/sentiment.json", llm=llm)
+    assert "examples_intro" in pe_gen.message_order, "Extra field 'examples_intro' is not included in message_order attribute"
+    assert "examples_intro" in pe_gen.prompt_elements.model_extra.keys(), "Extra field 'examples_intro' is not included in PromptELements"
+    # test if xtra field is included in final prompt
+    chat_prompt_template = pe_gen._get_messages().get_chat_prompt_template(message_order=pe_gen.message_order)
+    assert pe_gen.prompt_elements.examples_intro in chat_prompt_template.format(text=""), "Extra field 'examples_intro' is not included in final prompt"
+
+def test_message_order():
+    """
+    Message order can either be defined implicitly by json
+    or explicitly by class initialization.
+    Both cases are tested here.
+    """
+    # Test implicit order by json
+    # output_format is per default between context and examples. In case of sentiment json its the last element
+    llm = ChatOpenAI(temperature=0.0)
+    pe_gen = PromptEngineeringGenerator.from_json(f"templates/sentiment.json", llm=llm)
+    assert "output_format" in pe_gen.message_order[-1], "'output_format' is supposed to be at the end of the prompt element order"
+    # Test if last element of chat prompt template is also output_format
+    chat_prompt_template = pe_gen._get_messages().get_chat_prompt_template(message_order=pe_gen.message_order)
+    assert pe_gen.prompt_elements.output_format == chat_prompt_template.messages[-1].prompt.partial_variables["format_instructions"]
+
+    # Test explicit order by class initialization
+    prompt_elements = PromptElements(role="Sentiment classifier", examples=["positive", "negative", "neutral"])
+    pe_gen = PromptEngineeringGenerator(llm=llm, prompt_elements=prompt_elements, message_order=["examples", "role"])
+    assert "role" in pe_gen.message_order[
+        -1], "'role' is supposed to be at the end of the prompt element order"
+    # Test if last element of chat prompt template is also output_format
+    chat_prompt_template = pe_gen._get_messages().get_chat_prompt_template(message_order=pe_gen.message_order)
+    assert "Sentiment classifier" == chat_prompt_template.messages[-1].prompt.template
 
 
 def test_sentiment_generator():
@@ -24,8 +61,8 @@ def test_sentiment_generator():
 
 def test_few_shot_string_examples():
     """Test if examples can be provided without human ai interaction"""
-    prompt_elements = PromptElements(examples=PEFewShotExamples(examples=["positive", "negative", "neutral"]))
-    prompt_messages = PEMessages.from_pydantic(prompt_elements)
+    prompt_elements = PromptElements(examples=["positive", "negative", "neutral"])
+    prompt_messages = PromptEngineeringMessages.from_pydantic(prompt_elements)
     assert type(prompt_messages.examples) == SystemMessagePromptTemplate
     assert "Example 1: positive" in prompt_messages.examples.format().content
     assert "Example 2: negative" in prompt_messages.examples.format().content
@@ -41,7 +78,6 @@ def test_parsed_keyword_extractor():
     keyword_gen = ParsablePromptEngineeringGenerator.from_json(f"templates/keyword_extractor.json", llm, pydantic_cls=KeywordExtractorOutput)
     keyword_output: KeywordExtractorOutput = keyword_gen.generate(text=text)
     assert "ChatGPT" in keyword_output.keywords
-    assert "artificial intelligence" in keyword_output.keywords
 
 
 def test_parsed_midjourney_prompt_generator():

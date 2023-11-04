@@ -1,8 +1,8 @@
 {
   "role": "You are a sentiment classifier.",
   "instruction": "Extract the sentiment out of the user input.",
-  "examples": {
-    "human_ai_interaction": [
+  "examples_intro": "Here are some examples of sentiment classification",
+  "examples": [
       {
         "human": "My day has been great",
         "ai": "positive"
@@ -15,8 +15,7 @@
         "human": "I hate when i cannot find things in my bag",
         "ai": "negative"
       }
-    ]
-  },
+  ],
   "input": "{text}",
   "output_format": "The output should be either 'positive', 'negative' or 'neutral'"
 }
