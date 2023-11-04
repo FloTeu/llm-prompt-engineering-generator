@@ -38,7 +38,11 @@ class PromptEngineeringGenerator:
         """Generates a llm str output based on prompt engineering elements"""
         assert self.prompt_elements.is_any_set()
         llm_chain = self._get_llm_chain()
-        return llm_chain.run(*args, **kwargs)
+        if bool(args):
+            return llm_chain.run(*args, **kwargs)
+        else:
+            # predict() can be called without any arguments provided
+            return llm_chain.predict(**kwargs)
 
 
 class ParsablePromptEngineeringGenerator(PromptEngineeringGenerator):

@@ -1,8 +1,9 @@
 from typing import List
 from langchain.chat_models import ChatOpenAI
+from langchain.prompts import SystemMessagePromptTemplate
 from pydantic import BaseModel, Field
 from llm_prompting_gen.generators import PromptEngineeringGenerator, ParsablePromptEngineeringGenerator
-from llm_prompting_gen.models.prompt_engineering import PEMessages
+from llm_prompting_gen.models.prompt_engineering import PEMessages, PromptElements, PEFewShotExamples
 from llm_prompting_gen.models.output import KeywordExtractorOutput
 
 def test_data_class_initialising():
@@ -20,6 +21,15 @@ def test_sentiment_generator():
     sentiment_gen = PromptEngineeringGenerator.from_json(f"templates/sentiment.json", llm)
     sentiment = sentiment_gen.generate(text="My dog looks so cute today")
     assert sentiment == "positive"
+
+def test_few_shot_string_examples():
+    """Test if examples can be provided without human ai interaction"""
+    prompt_elements = PromptElements(examples=PEFewShotExamples(examples=["positive", "negative", "neutral"]))
+    prompt_messages = PEMessages.from_pydantic(prompt_elements)
+    assert type(prompt_messages.examples) == SystemMessagePromptTemplate
+    assert "Example 1: positive" in prompt_messages.examples.format().content
+    assert "Example 2: negative" in prompt_messages.examples.format().content
+    assert "Example 3: neutral" in prompt_messages.examples.format().content
 
 def test_parsed_keyword_extractor():
     """Tests if we can extract keywords and parse output to pydantic"""

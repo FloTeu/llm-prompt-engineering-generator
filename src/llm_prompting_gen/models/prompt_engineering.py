@@ -1,8 +1,8 @@
-from typing import Optional, List
+from typing import Optional, List, Union
 
 from langchain.prompts import SystemMessagePromptTemplate, HumanMessagePromptTemplate, ChatPromptTemplate, \
     FewShotChatMessagePromptTemplate, PromptTemplate
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from llm_prompting_gen.constants import INSTRUCTOR_USER_NAME
 
 class PEFewShotExample(BaseModel):
@@ -12,8 +12,10 @@ class PEFewShotExample(BaseModel):
 
 class PEFewShotExamples(BaseModel):
     intro: Optional[str] = Field(description="If set, the few shot examples are introduced")
-    human_ai_interaction: List[PEFewShotExample] = Field(
+    human_ai_interaction: Optional[List[PEFewShotExample]] = Field(
         description="List of example human ai interaction. Shows the LLM how the output should look like.")
+    examples: Optional[List[str]] = Field(
+        description="List of examples. Can be used, if human ai interaction is not applicable for the use case.")
 
 
 class PromptElements(BaseModel):
@@ -29,6 +31,10 @@ class PromptElements(BaseModel):
     input: Optional[str] = Field(
         description="Target which the LLM should execute the task on. Could be for example a user question, or a text block to summarize.")
 
+    model_config = ConfigDict(
+        extra='allow',
+    )
+
     def is_any_set(self) -> bool:
         """
         Whether at least one prompt element is set.
@@ -40,9 +46,29 @@ class PromptElements(BaseModel):
         if self.examples and self.examples.intro:
             return SystemMessagePromptTemplate.from_template(self.examples.intro, additional_kwargs={"name": INSTRUCTOR_USER_NAME})
 
-    def get_few_shot_chat_msg_prompt_template(self) -> FewShotChatMessagePromptTemplate:
-        """Returns langchain few shot example prompt template"""
+    def get_example_system_prompt_template(self) -> SystemMessagePromptTemplate:
+        assert self.examples.examples, "examples are not set yet"
+        prompt_template = ""
+
+        for i, example in enumerate(self.examples.examples):
+            prompt_template += f"\nExample {i+1}: {example}"
+        return SystemMessagePromptTemplate.from_template(prompt_template, additional_kwargs={"name": INSTRUCTOR_USER_NAME})
+
+    def get_example_msg_prompt_template(self) -> Union[FewShotChatMessagePromptTemplate,SystemMessagePromptTemplate]:
+        """
+        Returns a message prompt template depending on the example format
+        If human_ai_interaction is set:
+            Returns langchain few shot example prompt template
+        If examples are set and no human_ai_interaction:
+            Returns langchain system message prompt template
+        """
         assert self.examples, "examples are not set yet"
+        # Return SystemMessagePromptTemplate in case only simple string examples are set
+        if self.examples.examples and not self.examples.human_ai_interaction:
+            return self.get_example_system_prompt_template()
+        assert self.examples.human_ai_interaction, "human ai interaction examples are not set yet"
+
+        # Return FewShotChatMessagePromptTemplate in case human_ai_interaction is set
         examples = []
         is_only_ai_interaction = all([not example.human for example in self.examples.human_ai_interaction])
         for example in self.examples.human_ai_interaction:
@@ -83,7 +109,7 @@ class PEMessages(BaseModel):
         description="Description how the LLM output format should look like")
     examples_intro: Optional[SystemMessagePromptTemplate] = Field(
         description="Optional intro block to explain LLM how to handle following examples")
-    examples: Optional[FewShotChatMessagePromptTemplate] = Field(
+    examples: Optional[Union[FewShotChatMessagePromptTemplate,SystemMessagePromptTemplate]] = Field(
         description="List of (few-shot) examples, how the output should look like")
     input: Optional[HumanMessagePromptTemplate] = Field(
         description="Target which the LLM should execute the task on. Could be for example a user question, or a text block to summarize.")
@@ -107,7 +133,7 @@ class PEMessages(BaseModel):
                 pe_elements.instruction, additional_kwargs={"name": INSTRUCTOR_USER_NAME}) if pe_elements.instruction else None,
             context=SystemMessagePromptTemplate.from_template(pe_elements.context, additional_kwargs={"name": INSTRUCTOR_USER_NAME}) if pe_elements.context else None,
             examples_intro=examples_intro_msg,
-            examples=pe_elements.get_few_shot_chat_msg_prompt_template() if pe_elements.examples else None,
+            examples=pe_elements.get_example_msg_prompt_template() if pe_elements.examples else None,
             input=HumanMessagePromptTemplate.from_template(pe_elements.input) if pe_elements.input else None,
             output_format=output_format_msg
         )
