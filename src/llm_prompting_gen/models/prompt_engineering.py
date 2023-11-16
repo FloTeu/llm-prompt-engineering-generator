@@ -97,16 +97,12 @@ class PromptEngineeringMessages(BaseModelV1, extra=Extra.allow):
 
     Note: Must be pydantic version 1, because PromptTemplates are not updated to version 2, yet
     """
-    role: Optional[SystemMessagePromptTemplate] = Field(None, description="The role in which the LLM should respond")
-    instruction: Optional[SystemMessagePromptTemplate] = Field(None, description="The task of the LLM")
-    context: Optional[SystemMessagePromptTemplate] = Field(
-        None, description="Context with relevant information to solve the task")
-    output_format: Optional[SystemMessagePromptTemplate] = Field(
-        None, description="Description how the LLM output format should look like")
-    examples: Optional[Union[FewShotChatMessagePromptTemplate,SystemMessagePromptTemplate]] = Field(
-        None, description="List of (few-shot) examples, how the output should look like")
-    input: Optional[HumanMessagePromptTemplate] = Field(
-        None, description="Target which the LLM should execute the task on. Could be for example a user question, or a text block to summarize.")
+    role: Optional[SystemMessagePromptTemplate] = None # description="The role in which the LLM should respond"
+    instruction: Optional[SystemMessagePromptTemplate] = None # description="The task of the LLM"
+    context: Optional[SystemMessagePromptTemplate] = None # description="Context with relevant information to solve the task"
+    output_format: Optional[SystemMessagePromptTemplate] = None # description="Description how the LLM output format should look like"
+    examples: Optional[Union[FewShotChatMessagePromptTemplate,SystemMessagePromptTemplate]] = None # description="List of (few-shot) examples, how the output should look like"
+    input: Optional[HumanMessagePromptTemplate] = None # description="Target which the LLM should execute the task on. Could be for example a user question, or a text block to summarize."
 
     @classmethod
     def from_pydantic(cls, pe_elements: PromptElements):
@@ -150,13 +146,17 @@ class PromptEngineeringMessages(BaseModelV1, extra=Extra.allow):
         # TODO
         raise NotImplementedError
 
+    def get_non_none_fields(self) -> list:
+        # TODO: Update after update to pydantic v2
+        return [field for field, value in self.dict().items() if value is not None]
+
     def get_chat_prompt_template(self, message_order: List[str] = None) -> ChatPromptTemplate:
         """Combines all prompt element messages into one chat prompt template"""
         # Print warning in case message_order does not include all fields available
-        # TODO: Update to list(self.__class__.model_fields.keys()) after update to pydantic v2
-        fields = list(self.__class__.__fields__.keys())
+        fields_not_none = self.get_non_none_fields()
+
         if message_order:
-            excluded_fields = set(fields) - set(message_order)
+            excluded_fields = set(fields_not_none) - set(message_order)
             if excluded_fields:
                 logging.warning(f"'message_order' does not include fields {excluded_fields}. They will be ignored for chat prompt template creation")
 
