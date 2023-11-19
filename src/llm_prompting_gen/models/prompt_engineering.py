@@ -1,10 +1,10 @@
 import json
 import logging
-from typing import Optional, List, Union
+from typing import Optional, List, Union, Dict
 from langchain.pydantic_v1 import BaseModel as BaseModelV1
 from langchain.prompts import SystemMessagePromptTemplate, HumanMessagePromptTemplate, ChatPromptTemplate, \
     FewShotChatMessagePromptTemplate, PromptTemplate
-from langchain.prompts.chat import BaseMessagePromptTemplate
+from langchain.prompts.chat import BaseMessagePromptTemplate, BaseChatPromptTemplate
 from pydantic import BaseModel, Field, ConfigDict, Extra
 
 from llm_prompting_gen.constants import INSTRUCTOR_USER_NAME
@@ -89,20 +89,21 @@ class PromptElements(BaseModel):
 
 
 
-class PromptEngineeringMessages(BaseModelV1, extra=Extra.allow):
+class PromptEngineeringMessages(object):
     """
-    Dataclass which contains everything to create a LLM Output
+    Dataclass which contains all messages to create a LLM Output
     based on prompt engineering techniques.
     Transforms strings into langchain prompt template messages.
-
-    Note: Must be pydantic version 1, because PromptTemplates are not updated to version 2, yet
     """
-    role: Optional[SystemMessagePromptTemplate] = None # description="The role in which the LLM should respond"
-    instruction: Optional[SystemMessagePromptTemplate] = None # description="The task of the LLM"
-    context: Optional[SystemMessagePromptTemplate] = None # description="Context with relevant information to solve the task"
-    output_format: Optional[SystemMessagePromptTemplate] = None # description="Description how the LLM output format should look like"
-    examples: Optional[Union[FewShotChatMessagePromptTemplate,SystemMessagePromptTemplate]] = None # description="List of (few-shot) examples, how the output should look like"
-    input: Optional[HumanMessagePromptTemplate] = None # description="Target which the LLM should execute the task on. Could be for example a user question, or a text block to summarize."
+
+    def __init__(self, messages: Dict[str, Union[BaseMessagePromptTemplate, BaseChatPromptTemplate]] = None):
+        """
+        Note: messages can contain custom keys and do not require but can match the PromptElements fields.
+
+        :param messages: Look up dict matching prompt element key with corresponding PromptTemplate
+        """
+        self.messages = messages if messages else {}
+
 
     @classmethod
     def from_pydantic(cls, pe_elements: PromptElements):
@@ -132,7 +133,7 @@ class PromptEngineeringMessages(BaseModelV1, extra=Extra.allow):
         for extra_field, extra_value in pe_elements.model_extra.items():
             messages[extra_field] = SystemMessagePromptTemplate.from_template(extra_value, additional_kwargs={"name": INSTRUCTOR_USER_NAME})
 
-        return cls(**messages)
+        return cls(messages=messages)
 
     @classmethod
     def from_json(cls, file_path):
@@ -146,17 +147,15 @@ class PromptEngineeringMessages(BaseModelV1, extra=Extra.allow):
         # TODO
         raise NotImplementedError
 
-    def get_non_none_fields(self) -> list:
-        # TODO: Update after update to pydantic v2
-        return [field for field, value in self.dict().items() if value is not None]
+    def get_chat_prompt_template(self, message_order: Optional[List[str]] = None) -> ChatPromptTemplate:
+        """Combines all prompt element messages into one chat prompt template
 
-    def get_chat_prompt_template(self, message_order: List[str] = None) -> ChatPromptTemplate:
-        """Combines all prompt element messages into one chat prompt template"""
+        :param message_order: Optional list of prompt element keys, to define message order of final chat prompt template
+        :return:
+        """
         # Print warning in case message_order does not include all fields available
-        fields_not_none = self.get_non_none_fields()
-
         if message_order:
-            excluded_fields = set(fields_not_none) - set(message_order)
+            excluded_fields = set(self.messages.keys()) - set(message_order)
             if excluded_fields:
                 logging.warning(f"'message_order' does not include fields {excluded_fields}. They will be ignored for chat prompt template creation")
 
@@ -166,12 +165,13 @@ class PromptEngineeringMessages(BaseModelV1, extra=Extra.allow):
         messages = []
         # If message order is provided, use this order
         if message_order:
-            for field in message_order:
-                field_value = getattr(self, field, None)
-                if field_value and is_valid_message(field_value):
-                    messages.append(field_value)
-        # Otherwise take the field order defined by class
+            for prompt_element_key in message_order:
+                message = self.messages.get(prompt_element_key, None)
+                # check if message type is valid
+                if message and is_valid_message(message):
+                    messages.append(message)
+        # Otherwise take the default order of the instance attribute
         else:
-            messages = [f_v for f_k, f_v in self if is_valid_message(f_v)]
+            messages = [f_v for f_k, f_v in self.messages.items() if is_valid_message(f_v)]
 
         return ChatPromptTemplate.from_messages(messages)
