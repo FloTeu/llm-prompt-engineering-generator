@@ -63,10 +63,11 @@ def test_few_shot_string_examples():
     """Test if examples can be provided without human ai interaction"""
     prompt_elements = PromptElements(examples=["positive", "negative", "neutral"])
     prompt_messages = PromptEngineeringMessages.from_pydantic(prompt_elements)
-    assert type(prompt_messages.messages["examples"]) == SystemMessagePromptTemplate
-    assert "Example 1: positive" in prompt_messages.messages["examples"].format().content
-    assert "Example 2: negative" in prompt_messages.messages["examples"].format().content
-    assert "Example 3: neutral" in prompt_messages.messages["examples"].format().content
+    example_msg = prompt_messages.messages["examples"][0]
+    assert type(example_msg) == SystemMessagePromptTemplate
+    assert "Example 1: positive" in example_msg.format().content
+    assert "Example 2: negative" in example_msg.format().content
+    assert "Example 3: neutral" in example_msg.format().content
 
 def test_parsed_keyword_extractor():
     """Tests if we can extract keywords and parse output to pydantic"""
