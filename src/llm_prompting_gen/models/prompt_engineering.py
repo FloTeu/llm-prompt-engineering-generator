@@ -149,7 +149,7 @@ class PromptEngineeringMessages:
             if message_key not in self.messages:
                 logging.warning(
                     f"messages do not contain key '{message_key}'")
-                return None
+                continue
             message_or_list = self.messages[message_key]
             # Case message is valid
             if isinstance(message_or_list, BaseMessagePromptTemplate):
