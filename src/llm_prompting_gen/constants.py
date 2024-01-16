@@ -1,1 +1,2 @@
 INSTRUCTOR_USER_NAME = "instructor"
+HUMAN_MESSAGE_KEYS = ["input"]

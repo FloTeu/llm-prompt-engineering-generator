@@ -1,3 +1,5 @@
+import json
+
 from langchain.prompts import SystemMessagePromptTemplate
 
 from llm_prompting_gen.models.prompt_engineering import PromptEngineeringMessages, PromptElements
@@ -21,3 +23,17 @@ def test_few_shot_string_examples():
     assert "Example 1: positive" in example_msg.format().content
     assert "Example 2: negative" in example_msg.format().content
     assert "Example 3: neutral" in example_msg.format().content
+
+def test_order_prompt_engineering_messages_by_json():
+    """Test whether the order of the original local json file is retained"""
+    # test file has a different order compared to PromptElements fields
+    file_path = "tests/test_templates/order_test.json"
+    prompt_messages = PromptEngineeringMessages.from_json(file_path)
+    with open(file_path, "r") as fp:
+        message_dict = json.load(fp)
+    expected_pe_messages_order = list(message_dict.keys())
+
+    # Test if original json order is retained, after instance creation
+    assert expected_pe_messages_order == list(prompt_messages.messages.keys())
+
+

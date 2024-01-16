@@ -1,11 +1,11 @@
 import json
 import logging
-from typing import Optional, List, Union, Dict
+from typing import Optional, List, Union, Dict, Any
 from langchain.prompts import SystemMessagePromptTemplate, HumanMessagePromptTemplate, ChatPromptTemplate, PromptTemplate, AIMessagePromptTemplate
 from langchain.prompts.chat import BaseMessagePromptTemplate
 from pydantic import BaseModel, Field, ConfigDict
 
-from llm_prompting_gen.constants import INSTRUCTOR_USER_NAME
+from llm_prompting_gen.constants import INSTRUCTOR_USER_NAME, HUMAN_MESSAGE_KEYS
 
 class FewShotHumanAIExample(BaseModel):
     human: Optional[str] = Field(None, description="Example human message.", examples=["What is 2 + 3?"])
@@ -97,32 +97,36 @@ class PromptEngineeringMessages:
 
 
     @classmethod
-    def from_pydantic(cls, pe_elements: PromptElements):
-        """Init class by PromptElements pydantic"""
-        messages = {}
-        if pe_elements.role:
-            messages["role"] = SystemMessagePromptTemplate.from_template(pe_elements.role, additional_kwargs={"name": INSTRUCTOR_USER_NAME})
-        if pe_elements.instruction:
-            messages["instruction"] = SystemMessagePromptTemplate.from_template(
-                pe_elements.instruction, additional_kwargs={"name": INSTRUCTOR_USER_NAME})
-        if pe_elements.context:
-            messages["context"] = SystemMessagePromptTemplate.from_template(pe_elements.context, additional_kwargs={"name": INSTRUCTOR_USER_NAME})
-        if pe_elements.output_format:
-            # Create output format system message
-            output_format_prompt = PromptTemplate(
-                template="{format_instructions}",
-                input_variables=[],
-                partial_variables={"format_instructions": pe_elements.output_format}
-            )
-            messages["output_format"] = SystemMessagePromptTemplate(prompt=output_format_prompt, additional_kwargs={"name": INSTRUCTOR_USER_NAME})
-        if pe_elements.examples:
-            messages["examples"] = pe_elements.get_example_msg_prompt_templates()
-        if pe_elements.input:
-            messages["input"] = HumanMessagePromptTemplate.from_template(pe_elements.input)
+    def from_pydantic(cls, pe_elements: PromptElements, message_order: Optional[List[str]] = None):
+        """
+        Init class by PromptElements pydantic
+        If message_order is provided,
+        """
+        messages: Dict[str, Union[BaseMessagePromptTemplate, List[BaseMessagePromptTemplate]]] = {}
+        # Either use provides message_order or get it implicitly form pydantic object
+        pe_elements_dict = pe_elements.model_dump()
+        message_order: List[str] = message_order or list(pe_elements_dict.keys())
+        assert all(msg in pe_elements_dict for msg in message_order)
 
-        # Add extra fields as system messages
-        for extra_field, extra_value in pe_elements.model_extra.items():
-            messages[extra_field] = SystemMessagePromptTemplate.from_template(extra_value, additional_kwargs={"name": INSTRUCTOR_USER_NAME})
+        for message_key in message_order:
+            message_value: Any = pe_elements_dict[message_key]
+            if message_value is None:
+                continue
+            elif message_key in HUMAN_MESSAGE_KEYS:
+                messages[message_key] = HumanMessagePromptTemplate.from_template(message_value)
+            elif message_key == "output_format":
+                output_format_prompt = PromptTemplate(
+                    template="{format_instructions}",
+                    input_variables=[],
+                    partial_variables={"format_instructions": message_value}
+                )
+                messages[message_key] = SystemMessagePromptTemplate(prompt=output_format_prompt, additional_kwargs={"name": INSTRUCTOR_USER_NAME})
+            elif message_key == "examples":
+                messages[message_key] = pe_elements.get_example_msg_prompt_templates()
+            else:
+                # Everything else is expected to be a SystemMessage
+                assert isinstance(message_value, str), f"Message value {message_value} is expected to be string"
+                messages[message_key] = SystemMessagePromptTemplate.from_template(message_value, additional_kwargs={"name": INSTRUCTOR_USER_NAME})
 
         return cls(messages=messages)
 
@@ -131,7 +135,7 @@ class PromptEngineeringMessages:
         """Init class by json file"""
         with open(file_path, "r") as fp:
             data_dict = json.load(fp)
-        return cls.from_pydantic(PromptElements(**data_dict))
+        return cls.from_pydantic(PromptElements(**data_dict), message_order=list(data_dict.keys()))
 
     @classmethod
     def from_yaml(cls, file_path):
