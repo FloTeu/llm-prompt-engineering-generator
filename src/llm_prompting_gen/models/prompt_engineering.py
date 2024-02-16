@@ -1,6 +1,9 @@
 import json
 import logging
+import yaml
+
 from typing import Optional, List, Union, Dict, Any
+
 from langchain.prompts import SystemMessagePromptTemplate, HumanMessagePromptTemplate, ChatPromptTemplate, PromptTemplate, AIMessagePromptTemplate
 from langchain.prompts.chat import BaseMessagePromptTemplate
 from pydantic import BaseModel, Field, ConfigDict
@@ -131,16 +134,20 @@ class PromptEngineeringMessages:
         return cls(messages=messages)
 
     @classmethod
-    def from_json(cls, file_path):
+    def from_json(cls, file_path: str):
         """Init class by json file"""
+        assert file_path.split(".")[-1] == "json", f"File {file_path} does not have the correct .json type"
         with open(file_path, "r") as fp:
             data_dict = json.load(fp)
         return cls.from_pydantic(PromptElements(**data_dict), message_order=list(data_dict.keys()))
 
     @classmethod
-    def from_yaml(cls, file_path):
-        # TODO
-        raise NotImplementedError
+    def from_yaml(cls, file_path: str):
+        """Init class by yaml file"""
+        assert file_path.split(".")[-1] == "yaml", f"File {file_path} does not have the correct .yaml type"
+        with open(file_path, "r") as fp:
+            data_dict = yaml.safe_load(fp)
+        return cls.from_pydantic(PromptElements(**data_dict), message_order=list(data_dict.keys()))
 
     def get_flattened_messages(self, message_order: Optional[List[str]] = None) -> List[BaseMessagePromptTemplate]:
         """Returns list of valid messages. Examples are  flattened in order to get one dimension output.

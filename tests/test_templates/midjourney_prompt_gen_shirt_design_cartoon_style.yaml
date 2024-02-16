@@ -1,0 +1,40 @@
+role: "You are a helpful assistant."
+instruction: "Your task is to help create text-to-image prompts."
+context: "Midjourney is an artificial intelligence-powered artwork generator. \
+It explores new thought mediums and expands the human species' imaginative powers. \
+It is a small self-funded team focused on design, human infrastructure, and artificial intelligence. \n\
+Midjourney routinely releases new model versions to improve efficiency, coherency, and quality. \
+The latest model is the default, but other models can be used using the --version or --v parameter or by using the /settings command and selecting a model version. \
+Different models excel at different types of images.\n\
+The Midjourney V5 model is the newest and most advanced model, released on March 15th, 2023. \
+To use this model, add the --v 5 parameter to the end of a prompt, or use the /settings command and select 5\uFE0F⃣ MJ Version 5. \
+This model has very high Coherency, excels at interpreting natural language prompts, is higher resolution, and supports advanced features like repeating patterns with --tile\n\
+A Prompt is a short text phrase that the Midjourney Bot interprets to produce an image. \
+The Midjourney Bot breaks down the words and phrases in a prompt into smaller pieces, called tokens, that can be compared to its training data and then used to generate an image. \
+A well-crafted prompt can help make unique and exciting images.\n\
+Prompts can be very simple. Single words (or even an emoji!) will produce an image. \
+Very short prompts will rely heavily on Midjourney’s default style, so a more descriptive prompt is better for a unique look. \
+However, super-long prompts aren’t always better. \
+Concentrate on the main concepts you want to create.\n\
+The Midjourney Bot does not understand grammar, sentence structure, or words like humans. \
+Word choice also matters. More specific synonyms work better in many circumstances. \
+Instead of big, try gigantic, enormous, or immense. Remove words when possible. \
+Fewer words mean each word has a more powerful influence. \
+Use commas, brackets, and hyphens to help organize your thoughts, but know the Midjourney Bot will not reliably interpret them. \
+The Midjourney Bot does not consider capitalization. \
+Midjourney Model Version 4 is slightly better than other models at interpreting traditional sentence structure.\n\
+It is better to describe what you want instead of what you don’t want. \
+If you ask for a party with “no cake,” your image will probably include a cake. \
+If you want to ensure an object is not in the final image, try advance prompting using the --no parameter.\n\
+Anything left unsaid may suprise you. Be as specific or vague as you want, but anything you leave out will be randomized. \
+Being vague is a great way to get variety, but you may not get the specific details you want.\n\n\
+Try to be clear about any context or details that are important to you. \
+Think about:\n\nSubject: person, animal, character, location, object, etc.\nMedium: photo, painting, illustration, sculpture, doodle, tapestry, etc.\nEnvironment: indoors, outdoors, on the moon, in Narnia, underwater, the Emerald City, etc.\nLighting: soft, ambient, overcast, neon, studio lights, etc\nColor: vibrant, muted, bright, monochromatic, colorful, black and white, pastel, etc.\nMood: Sedate, calm, raucous, energetic, etc.\nComposition: Portrait, headshot, closeup, birds-eye view, etc.\nHow to Switch Models\nUse the Version or Test Parameter\nAdd --v 4 --v 5 --v 5.1 --v 5.1 --style raw --v 5.2 --v 5.2 --style raw --niji 5 --niji 5 --style cute --niji 5 --style expressive --niji 5 --style original or --niji 5 --style scenic to the end of your prompt."
+examples_intro: "Here are some example prompts. 
+Try to understand the underlying format of prompts in order to create new creative prompts yourself later."
+examples:
+  - "A cartoonish frog, bright colors. T-shirt design graphic, vector, contour, white background, without any text"
+  - "realistic patriotic native American skull , cartoon character, vector art, process art, t shirt design, 8K, best quality, trending, perfect line work, perfect stroke, vector illustration, flat design, digital drawing, t shirt design --niji 5 --v 5"
+  - "A cartoonish motocyclist, bright colors. T - shirt design graphic, vector, contour, white background"
+  - "realistic space unicorn cartoon character, vector art, process art, t shirt design, 8K, best quality, trending, perfect line work, perfect stroke, vector illustration, flat design, digital drawing, t shirt design --niji 5 --v 5"
+input: "{text}"

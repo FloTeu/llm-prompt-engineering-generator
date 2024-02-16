@@ -1,0 +1,5 @@
+{
+  "instruction": ["Here are some examples of sentiment classification", ""],
+  "role": 0.72,
+  "examples": "negative"
+}

@@ -31,10 +31,13 @@ from llm_prompting_gen.generators import PromptEngineeringGenerator
 from llm_prompting_gen.models.prompt_engineering import PromptElements
 from langchain.chat_models import ChatOpenAI
 
-## Option 1: Simply load a JSON file following the format of llm_prompting_gen.models.prompt_engineering.PromptElements
+## Option 1: Simply load a JSON or YAML file following the format of llm_prompting_gen.models.prompt_engineering.PromptElements
 # Make sure env variable OPENAI_API_KEY is set
 llm = ChatOpenAI(temperature=0.0)
+# JSON 
 keyword_extractor = PromptEngineeringGenerator.from_json("templates/keyword_extractor.json", llm=llm)
+# YAML
+keyword_extractor = PromptEngineeringGenerator.from_yaml("templates/keyword_extractor.yaml", llm=llm)
 llm_output = keyword_extractor.generate(text=text_with_keywords)
 
 ## Option 2: Simply create a Prompt Engineering class yourself

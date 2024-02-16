@@ -2,6 +2,7 @@ import logging
 import json
 from typing import Optional, Type, List
 
+import yaml
 from langchain.chains import LLMChain
 from langchain.base_language import BaseLanguageModel
 from langchain.output_parsers import PydanticOutputParser, RetryWithErrorOutputParser
@@ -33,6 +34,13 @@ class PromptEngineeringGenerator:
     def from_json(cls, file_path: str, llm: BaseLanguageModel):
         with open(file_path, "r") as fp:
             data_dict = json.load(fp)
+        prompt_elements = PromptElements(**data_dict)
+        return cls(llm=llm, prompt_elements=prompt_elements, message_order=list(data_dict.keys()))
+
+    @classmethod
+    def from_yaml(cls, file_path: str, llm: BaseLanguageModel):
+        with open(file_path, "r") as fp:
+            data_dict = yaml.safe_load(fp)
         prompt_elements = PromptElements(**data_dict)
         return cls(llm=llm, prompt_elements=prompt_elements, message_order=list(data_dict.keys()))
 
@@ -88,6 +96,14 @@ class ParsablePromptEngineeringGenerator(PromptEngineeringGenerator):
     def from_json(cls, file_path: str, llm: BaseLanguageModel, pydantic_cls: Type[BaseModel]):
         with open(file_path, "r") as fp:
             data_dict = json.load(fp)
+        prompt_elements = PromptElements(**data_dict)
+        return cls(llm=llm, pydantic_cls=pydantic_cls, prompt_elements=prompt_elements,
+                   message_order=list(data_dict.keys()))
+
+    @classmethod
+    def from_yaml(cls, file_path: str, llm: BaseLanguageModel, pydantic_cls: Type[BaseModel]):
+        with open(file_path, "r") as fp:
+            data_dict = yaml.safe_load(fp)
         prompt_elements = PromptElements(**data_dict)
         return cls(llm=llm, pydantic_cls=pydantic_cls, prompt_elements=prompt_elements,
                    message_order=list(data_dict.keys()))
