@@ -5,11 +5,12 @@ from typing import Optional, Type, List
 import yaml
 from langchain.chains import LLMChain
 from langchain.base_language import BaseLanguageModel
-from langchain.output_parsers import PydanticOutputParser, RetryWithErrorOutputParser
+from langchain.output_parsers import RetryWithErrorOutputParser
 from langchain.prompts import ChatPromptTemplate
 from langchain.schema import OutputParserException
 from pydantic import BaseModel
 
+from llm_prompting_gen.output_parser.pydantic_parser import PydanticOutputParser
 from llm_prompting_gen.models.prompt_engineering import PromptEngineeringMessages, PromptElements
 
 
