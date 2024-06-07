@@ -65,16 +65,17 @@ class PromptEngineeringGenerator:
         chat_prompt = self.get_chat_prompt()
         return chat_prompt.format(**kwargs)
 
-    def generate(self, *args, **kwargs) -> str:
+    def generate(self, **kwargs) -> str:
         """Generates a llm str output based on prompt engineering elements"""
         assert self.prompt_elements.is_any_set()
         llm_chain = self._get_llm_chain()
-        if bool(args):
-            return llm_chain.run(*args, **kwargs)
-        else:
-            # predict() can be called without any arguments provided
-            return llm_chain.predict(**kwargs)
+        return llm_chain.predict(**kwargs)
 
+    async def agenerate(self, **kwargs) -> str:
+        """Asynchronously generates a llm str output based on prompt engineering elements"""
+        assert self.prompt_elements.is_any_set()
+        llm_chain = self._get_llm_chain()
+        return await llm_chain.apredict(**kwargs)
 
 class ParsablePromptEngineeringGenerator(PromptEngineeringGenerator):
     """
@@ -90,6 +91,8 @@ class ParsablePromptEngineeringGenerator(PromptEngineeringGenerator):
         self.output_parser = PydanticOutputParser(pydantic_object=pydantic_cls)
         self.prompt_elements.output_format = self.output_parser.get_format_instructions()
         # If output_format was not included, append it to end of the message order
+        if self.message_order is None:
+            self.message_order = ["output_format"]
         if "output_format" not in self.message_order:
             self.message_order.append("output_format")
 
@@ -109,9 +112,9 @@ class ParsablePromptEngineeringGenerator(PromptEngineeringGenerator):
         return cls(llm=llm, pydantic_cls=pydantic_cls, prompt_elements=prompt_elements,
                    message_order=list(data_dict.keys()))
 
-    def generate(self, *args, **kwargs) -> BaseModel:
+    def generate(self, **kwargs) -> BaseModel:
         """Generates a pydantic parsed object"""
-        llm_output = super().generate(*args, **kwargs)
+        llm_output = super().generate(**kwargs)
         try:
             # return parsed output
             return self.output_parser.parse(llm_output)
@@ -121,3 +124,16 @@ class ParsablePromptEngineeringGenerator(PromptEngineeringGenerator):
             retry_parser = RetryWithErrorOutputParser.from_llm(parser=self.output_parser, llm=self.llm)
             _input = self._get_llm_chain().prompt.format_prompt(**kwargs)
             return retry_parser.parse_with_prompt(llm_output, _input)
+
+    async def agenerate(self, **kwargs) -> BaseModel:
+        """Asynchronously generates a pydantic parsed object"""
+        llm_output = await super().agenerate(**kwargs)
+        try:
+            # return parsed output
+            return self.output_parser.parse(llm_output)
+        except OutputParserException:
+            logging.warning("Could not parse llm output to pydantic class. Retry...")
+            # Retry to get right format
+            retry_parser = RetryWithErrorOutputParser.from_llm(parser=self.output_parser, llm=self.llm)
+            _input = self._get_llm_chain().prompt.format_prompt(**kwargs)
+            return await retry_parser.aparse_with_prompt(llm_output, _input)

@@ -25,6 +25,16 @@ def test_parsed_keyword_extractor():
     keyword_output: KeywordExtractorOutput = keyword_gen.generate(text=text)
     assert "ChatGPT" in keyword_output.keywords
 
+async def test_aparsed_keyword_extractor():
+    """Tests if we can extract keywords and parse output to pydantic with asynchronous call"""
+    llm = ChatOpenAI(temperature=0.0)
+    text = """
+    Generative artificial intelligence (also generative AI or GenAI[1]) is artificial intelligence capable of generating text, images, or other media, using generative models.[2][3][4] Generative AI models learn the patterns and structure of their input training data and then generate new data that has similar characteristics.
+    In the early 2020s, advances in transformer-based deep neural networks enabled a number of generative AI systems notable for accepting natural language prompts as input. These include large language model chatbots such as ChatGPT, Bing Chat, Bard, and LLaMA, and text-to-image artificial intelligence art systems such as Stable Diffusion, Midjourney, and DALL-E.
+    """
+    keyword_gen = ParsablePromptEngineeringGenerator.from_json(f"tests/test_templates/keyword_extractor.json", llm, pydantic_cls=KeywordExtractorOutput)
+    keyword_output: KeywordExtractorOutput = await keyword_gen.agenerate(text=text)
+    assert "ChatGPT" in keyword_output.keywords
 
 def test_parsed_midjourney_prompt_generator():
     """Test if basic prompt generator class can be initialised an executed"""

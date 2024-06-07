@@ -1,12 +1,12 @@
 import json
-from typing import List
+from unittest.mock import patch
 
 import yaml
-from langchain.chat_models import ChatOpenAI
-from pydantic import BaseModel, Field
+from langchain.chains.llm import LLMChain
+from langchain.output_parsers import RetryWithErrorOutputParser
+from pydantic import BaseModel
 from llm_prompting_gen.generators import PromptEngineeringGenerator, ParsablePromptEngineeringGenerator
 from llm_prompting_gen.models.prompt_engineering import PromptElements
-from llm_prompting_gen.models.output import KeywordExtractorOutput
 
 def test_extra_field(test_llm):
     """
@@ -76,4 +76,40 @@ def test_from_yaml(test_llm):
         assert len(expected_message_keys - set(pe_gen._get_messages().messages.keys())) == 0
         pe_gen = ParsablePromptEngineeringGenerator.from_yaml(file_path, llm=test_llm, pydantic_cls=TestOutputClass)
         assert len(expected_message_keys - set(pe_gen._get_messages().messages.keys())) == 0
+
+def test_parsable_generate(test_llm):
+    """Test if generate with retry functionality works as expected"""
+    class TestOutputClass(BaseModel):
+        output: str
+
+    expected_output = TestOutputClass(output="test")
+
+    with patch.object(LLMChain, '_call') as mock_get_data:
+        unparsable_output = {"text": '{"out": "wrong key"}'}
+        mock_get_data.return_value = unparsable_output
+        prompt_elements = PromptElements(instruction="Create a example object of the provided output format")
+        pe_gen = ParsablePromptEngineeringGenerator(prompt_elements=prompt_elements, llm=test_llm, pydantic_cls=TestOutputClass)
+        with patch.object(RetryWithErrorOutputParser, "parse_with_prompt") as mock_output_parser:
+            mock_output_parser.return_value = expected_output
+            gen_output = pe_gen.generate()
+
+    assert gen_output == expected_output
+
+async def test_parsable_agenerate(test_llm):
+    """Test if asynchronous generate with retry functionality works as expected"""
+    class TestOutputClass(BaseModel):
+        output: str
+
+    expected_output = TestOutputClass(output="test")
+
+    with patch.object(LLMChain, '_acall') as mock_get_data:
+        unparsable_output = {"text": '{"out": "wrong key"}'}
+        mock_get_data.return_value = unparsable_output
+        prompt_elements = PromptElements(instruction="Create a example object of the provided output format")
+        pe_gen = ParsablePromptEngineeringGenerator(prompt_elements=prompt_elements, llm=test_llm, pydantic_cls=TestOutputClass)
+        with patch.object(RetryWithErrorOutputParser, "aparse_with_prompt") as mock_output_parser:
+            mock_output_parser.return_value = expected_output
+            gen_output = await pe_gen.agenerate()
+
+    assert gen_output == expected_output
 
